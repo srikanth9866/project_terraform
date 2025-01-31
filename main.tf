@@ -1,4 +1,4 @@
-# create a s3 bucket sri3928031999 
+# create a s3 bucket sri39280319991 
 
 provider "aws" {
   region = "ap-south-1" # Change to your preferred AWS region
@@ -6,7 +6,7 @@ provider "aws" {
 
 terraform {
   backend "s3" {
-    bucket = "sri3928031999" # Replace with your S3 bucket name
+    bucket = "sri39280319991" # Replace with your S3 bucket name
     key    = "terraform.tfstate"   # State file name
     region = "ap-south-1"          # Replace with your S3 bucket region
   }
