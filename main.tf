@@ -1,76 +1,71 @@
-# create a s3 bucket sri39280319991 
-
 provider "aws" {
-  region = "ap-south-1" # Change to your preferred AWS region
+  region = "ap-south-1"  # Mumbai region
 }
 
 terraform {
   backend "s3" {
-    bucket = "sri39280319991" # Replace with your S3 bucket name
-    key    = "terraform.tfstate"   # State file name
-    region = "ap-south-1"          # Replace with your S3 bucket region
+    bucket = "sri39280319991"   # Your S3 bucket for storing Terraform state
+    key    = "terraform.tfstate"
+    region = "ap-south-1"
   }
 }
 
-# Create a VPC
-resource "aws_vpc" "my_vpc" {
-  cidr_block = "10.2.0.0/16"
-  tags = {
-    Name = "MyVPC"
+# Fetch the Default VPC
+data "aws_vpc" "default" {
+  default = true
+}
+
+# Fetch the Default Public Subnet in Mumbai Region
+data "aws_subnets" "default" {
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
   }
 }
 
-# Create a public subnet
-resource "aws_subnet" "public_subnet" {
-  vpc_id                  = aws_vpc.my_vpc.id
-  cidr_block              = "10.2.1.0/24"
-  map_public_ip_on_launch = true
-  availability_zone       = "ap-south-1a" # Change as needed
+# Select the first available subnet
+data "aws_subnet" "default" {
+  id = tolist(data.aws_subnets.default.ids)[0]
+}
 
-  tags = {
-    Name = "PublicSubnet"
+# Check if the "terraform" Security Group exists
+data "aws_security_group" "existing_terraform_sg" {
+  filter {
+    name   = "group-name"
+    values = ["terraform"]
+  }
+
+  filter {
+    name   = "vpc-id"
+    values = [data.aws_vpc.default.id]
   }
 }
 
-# Create an Internet Gateway
-resource "aws_internet_gateway" "igw" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  tags = {
-    Name = "MyInternetGateway"
-  }
-}
-
-# Create a Route Table for Public Subnet
-resource "aws_route_table" "public_rt" {
-  vpc_id = aws_vpc.my_vpc.id
-
-  route {
-    cidr_block = "0.0.0.0/0"
-    gateway_id = aws_internet_gateway.igw.id
-  }
-
-  tags = {
-    Name = "PublicRouteTable"
-  }
-}
-
-# Associate Route Table with Public Subnet
-resource "aws_route_table_association" "public_assoc" {
-  subnet_id      = aws_subnet.public_subnet.id
-  route_table_id = aws_route_table.public_rt.id
-}
-
-# Create a Security Group allowing all traffic
-resource "aws_security_group" "allow_all" {
-  name        = "allow_all_traffic"
-  description = "Allow all inbound and outbound traffic"
-  vpc_id      = aws_vpc.my_vpc.id
+# Create Security Group only if "terraform" SG does not exist
+resource "aws_security_group" "terraform_sg" {
+  count       = length(data.aws_security_group.existing_terraform_sg.id) == 0 ? 1 : 0
+  name        = "terraform"
+  description = "Terraform-managed security group"
+  vpc_id      = data.aws_vpc.default.id
 
   ingress {
-    from_port   = 0
-    to_port     = 0
-    protocol    = "-1"
+    from_port   = 22  # SSH
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 80  # HTTP
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443  # HTTPS
+    to_port     = 443
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 
@@ -82,18 +77,24 @@ resource "aws_security_group" "allow_all" {
   }
 
   tags = {
-    Name = "AllowAllTraffic"
+    Name = "TerraformSecurityGroup"
   }
 }
 
 # Create an EC2 Instance
 resource "aws_instance" "my_ec2" {
-  ami           = "ami-05fa46471b02db0ce" # Replace with your desired AMI ID
+  ami           = "ami-05fa46471b02db0ce" # Update with the latest AMI ID for Mumbai
   instance_type = "t2.medium"
-  subnet_id     = aws_subnet.public_subnet.id
-  associate_public_ip_address = true
+  subnet_id     = data.aws_subnet.default.id
+  key_name      = "mum-sri"  # Use your existing key pair
 
-  vpc_security_group_ids = [aws_security_group.allow_all.id]
+  vpc_security_group_ids = [
+    length(data.aws_security_group.existing_terraform_sg.id) == 0 ? 
+    aws_security_group.terraform_sg[0].id : 
+    data.aws_security_group.existing_terraform_sg.id
+  ]
+
+  associate_public_ip_address = true
 
   tags = {
     Name = "MyEC2Instance"
