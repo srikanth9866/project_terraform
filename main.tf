@@ -100,18 +100,17 @@ resource "aws_instance" "my_ec2" {
     Name = "MyEC2Instance"
   }
 
-  provisioner "file" {
-    source      = "install.sh"
-    destination = "/home/ec2-user/install.sh"
-  }
-
-  provisioner "file" {
-    source      = "Dockerfile"
-    destination = "/home/ec2-user/Dockerfile"
-  }
-
+  # Download the Dockerfile from GitHub
   provisioner "remote-exec" {
     inline = [
+      "curl -o /home/ec2-user/Dockerfile https://raw.githubusercontent.com/srikanth9866/project_terraform/main/dockerfile",
+    ]
+  }
+
+  # Download the install.sh script from GitHub (if applicable)
+  provisioner "remote-exec" {
+    inline = [
+      "curl -o /home/ec2-user/install.sh https://raw.githubusercontent.com/srikanth9866/project_terraform/main/install.sh",
       "chmod +x /home/ec2-user/install.sh",
       "sudo /home/ec2-user/install.sh"
     ]
