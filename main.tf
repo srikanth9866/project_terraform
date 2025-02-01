@@ -99,4 +99,28 @@ resource "aws_instance" "my_ec2" {
   tags = {
     Name = "MyEC2Instance"
   }
+
+  provisioner "file" {
+    source      = "install.sh"
+    destination = "/home/ec2-user/install.sh"
+  }
+
+  provisioner "file" {
+    source      = "Dockerfile"
+    destination = "/home/ec2-user/Dockerfile"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "chmod +x /home/ec2-user/install.sh",
+      "sudo /home/ec2-user/install.sh"
+    ]
+  }
+
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("~/.ssh/mum-sri.pem")
+    host        = self.public_ip
+  }
 }
