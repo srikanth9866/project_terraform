@@ -120,7 +120,7 @@ resource "aws_instance" "my_ec2" {
   connection {
     type        = "ssh"
     user        = "ec2-user"
-    private_key = file("C:/Users/HP/Desktop/key_pair/mum-sri.pem")
+    private_key = file("/mnt/c/Users/HP/Desktop/key_pair/mum-sri.pem")  # Use WSL-compatible path
     host        = self.public_ip
   }
 }
