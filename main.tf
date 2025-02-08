@@ -1,5 +1,5 @@
 provider "aws" {
-  region = "ap-south-1"  # Mumbai region
+  region = "us-east-1"  # Mumbai region
 }
 
 terraform {
