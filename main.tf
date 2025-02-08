@@ -6,7 +6,7 @@ terraform {
   backend "s3" {
     bucket = "sri39280319991"   # Your S3 bucket for storing Terraform state
     key    = "terraform.tfstate"
-    region = "ap-south-1"
+    region = "us-east-1"
   }
 }
 
