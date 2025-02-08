@@ -86,7 +86,7 @@ resource "aws_instance" "my_ec2" {
   ami           = "ami-05fa46471b02db0ce" # Update with the latest AMI ID for Mumbai
   instance_type = "t2.medium"
   subnet_id     = data.aws_subnet.default.id
-  key_name      = "mum-sri"  # Use your existing key pair
+  key_name      = "srikanth0370"  # Use your existing key pair
 
   vpc_security_group_ids = [
     length(data.aws_security_group.existing_terraform_sg.id) == 0 ? 
