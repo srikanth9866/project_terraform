@@ -119,7 +119,7 @@ resource "aws_instance" "my_ec2" {
   connection {
     type        = "ssh"
     user        = "ec2-user"
-    private_key = file("/var/lib/jenkins/mumbai-sri.pem")  # Path on the Jenkins server
+    private_key = file("/var/lib/jenkins/srikanth0370.pem")  # Path on the Jenkins server
     host        = self.public_ip
   }
 }
