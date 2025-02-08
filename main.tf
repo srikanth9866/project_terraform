@@ -83,7 +83,7 @@ resource "aws_security_group" "terraform_sg" {
 
 # Create an EC2 Instance
 resource "aws_instance" "my_ec2" {
-  ami           = "ami-05fa46471b02db0ce" # Update with the latest AMI ID for Mumbai
+  ami           = "ami-085ad6ae776d8f09c" # Update with the latest AMI ID for Mumbai
   instance_type = "t2.medium"
   subnet_id     = data.aws_subnet.default.id
   key_name      = "srikanth0370"  # Use your existing key pair
