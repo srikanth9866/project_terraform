@@ -26,7 +26,7 @@ pipeline {
                                 echo "Installing Terraform..."
                                 curl -LO https://releases.hashicorp.com/terraform/${TERRAFORM_VERSION}/terraform_${TERRAFORM_VERSION}_linux_amd64.zip
                                 unzip terraform_${TERRAFORM_VERSION}_linux_amd64.zip
-                                sudo mv terraform /usr/local/bin/
+                                mv terraform /usr/local/bin/
                                 rm terraform_${TERRAFORM_VERSION}_linux_amd64.zip
                             else
                                 echo "Terraform is already installed."
